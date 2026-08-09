@@ -121,7 +121,7 @@ describe('DashboardComponent', () => {
     respond({ totalUrls: 0, activeUrls: 0, inactiveUrls: 0, expiredUrls: 0, totalClicks: 0 }, []);
     await fixture.whenStable();
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain("haven't shortened anything yet");
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No links yet.');
   });
 
   it('offers a retry when the dashboard cannot be loaded', async () => {

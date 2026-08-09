@@ -107,7 +107,7 @@ describe('AdminUsersComponent', () => {
 
     expect(api.isSelf(ADMIN)).toBe(true);
     expect(api.isSelf(user())).toBe(false);
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('You');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('(you)');
   });
 
   it('passes the search, role and state filters to the server', async () => {

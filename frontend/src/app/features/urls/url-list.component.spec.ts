@@ -165,12 +165,12 @@ describe('UrlListComponent', () => {
     await fixture.whenStable();
     respond([]);
     await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain("haven't shortened anything yet");
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain("You don't have any links yet.");
 
     api.status.setValue('EXPIRED');
     respond([]);
     await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No URLs match these filters');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No links match these filters.');
   });
 
   it('clears every filter at once and reloads', async () => {
