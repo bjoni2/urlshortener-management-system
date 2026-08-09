@@ -1,0 +1,63 @@
+<header class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="page-subtitle">Hi, {{ auth.user()?.email }}</p>
+  </div>
+  <a matButton="filled" routerLink="/urls">
+    <mat-icon>add_link</mat-icon>
+    Shorten a URL
+  </a>
+</header>
+
+@if (loading()) {
+  <div class="state-panel"><mat-spinner diameter="40" /></div>
+} @else if (error(); as message) {
+  <div class="state-panel error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ message }}</p>
+    <button matButton="outlined" (click)="load()">Try again</button>
+  </div>
+} @else if (stats(); as counters) {
+  <section class="stat-grid" aria-label="Usage statistics">
+    <app-stat-card label="Total URLs" [value]="counters.totalUrls" icon="link" tone="primary" />
+    <app-stat-card label="Active" [value]="counters.activeUrls" icon="check_circle" tone="success" />
+    <app-stat-card label="Expired" [value]="counters.expiredUrls" icon="schedule" tone="warn" />
+    <app-stat-card label="Inactive" [value]="counters.inactiveUrls" icon="pause_circle" tone="neutral" />
+    <app-stat-card label="Total clicks" [value]="counters.totalClicks" icon="ads_click" tone="primary" />
+  </section>
+
+  <section class="recent" aria-label="Recently created URLs">
+    <div class="recent-header">
+      <h2>Recently created</h2>
+      <a matButton routerLink="/urls">View all</a>
+    </div>
+
+    @if (recent().length === 0) {
+      <div class="empty">
+        <mat-icon>link_off</mat-icon>
+        <p>No links yet.</p>
+        <a matButton="filled" routerLink="/urls">Create your first link</a>
+      </div>
+    } @else {
+      <ul class="recent-list">
+        @for (url of recent(); track url.id) {
+          <li class="recent-item">
+            <div class="recent-main">
+              <a class="recent-code" [href]="url.shortUrl" target="_blank" rel="noopener noreferrer">
+                /{{ url.shortCode }}
+              </a>
+              <span class="recent-target" [title]="url.originalUrl">{{ url.originalUrl }}</span>
+            </div>
+            <div class="recent-meta">
+              <span class="recent-clicks" [title]="url.clickCount + ' clicks'">
+                <mat-icon>ads_click</mat-icon>{{ url.clickCount }}
+              </span>
+              <span class="recent-created" [title]="url.createdAt">{{ url.createdAt | relativeTime }}</span>
+              <app-url-status-chip [status]="url.status" />
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

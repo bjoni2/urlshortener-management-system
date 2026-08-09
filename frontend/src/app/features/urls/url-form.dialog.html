@@ -1,0 +1,102 @@
+<h2 mat-dialog-title>{{ editing ? 'Edit short URL' : 'Shorten a URL' }}</h2>
+
+<mat-dialog-content>
+  @if (serverError(); as message) {
+    <div class="dialog-error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" id="url-form" novalidate>
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>Destination URL</mat-label>
+      <input matInput formControlName="originalUrl" placeholder="https://example.com/a/long/path" />
+      @if (editing) {
+        <mat-hint>The destination cannot be changed after creation</mat-hint>
+      }
+      @if (form.controls.originalUrl.hasError('required')) {
+        <mat-error>A destination URL is required</mat-error>
+      } @else if (form.controls.originalUrl.hasError('pattern')) {
+        <mat-error>The URL must start with http:// or https://</mat-error>
+      } @else if (form.controls.originalUrl.hasError('maxlength')) {
+        <mat-error>The URL must be at most 2048 characters</mat-error>
+      } @else if (form.controls.originalUrl.hasError('server')) {
+        <mat-error>{{ form.controls.originalUrl.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="outline">
+      <mat-label>Custom alias (optional)</mat-label>
+      <input matInput formControlName="customAlias" placeholder="my-link" />
+      <mat-hint>{{ editing ? 'The alias cannot be changed after creation' : 'Leave empty for a generated code' }}</mat-hint>
+      @if (form.controls.customAlias.hasError('minlength')) {
+        <mat-error>The alias must be at least 3 characters</mat-error>
+      } @else if (form.controls.customAlias.hasError('maxlength')) {
+        <mat-error>The alias must be at most 32 characters</mat-error>
+      } @else if (form.controls.customAlias.hasError('pattern')) {
+        <mat-error>Only letters, digits, hyphens and underscores are allowed</mat-error>
+      } @else if (form.controls.customAlias.hasError('server')) {
+        <mat-error>{{ form.controls.customAlias.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-checkbox formControlName="neverExpires">This link never expires</mat-checkbox>
+
+    <div class="expiry-row">
+      <mat-form-field appearance="outline" class="expiry-date">
+        <mat-label>Expires on</mat-label>
+        <!-- Clicking the field opens the calendar, not just the small toggle icon. -->
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="expiresDate"
+          [min]="minDate"
+          (click)="picker.open()"
+        />
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-datepicker #picker />
+        @if (form.controls.expiresDate.hasError('matDatepickerMin')) {
+          <mat-error>The expiration date must be in the future</mat-error>
+        } @else if (form.controls.expiresDate.hasError('server')) {
+          <mat-error>{{ form.controls.expiresDate.getError('server') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="expiry-time">
+        <mat-label>at</mat-label>
+        <input matInput [matTimepicker]="timePicker" formControlName="expiresTime" />
+        <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+        <mat-timepicker #timePicker interval="30min" />
+        @if (form.controls.expiresTime.hasError('server')) {
+          <mat-error>{{ form.controls.expiresTime.getError('server') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <p class="expiry-hint">
+      @if (editing) {
+        Clear the date to remove the expiration. A date in the past expires the link immediately.
+      } @else {
+        Leave empty to apply the default lifetime. Without a time, the link expires at the end of
+        the chosen day.
+      }
+    </p>
+
+    @if (editing) {
+      <mat-slide-toggle formControlName="active">
+        {{ form.controls.active.value ? 'Active — the link resolves' : 'Inactive — the link is disabled' }}
+      </mat-slide-toggle>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton type="button" (click)="dialogRef.close()">Cancel</button>
+  <button matButton="filled" type="submit" form="url-form" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-spinner class="spinner-inline" diameter="18" />
+    }
+    {{ editing ? 'Save changes' : 'Shorten URL' }}
+  </button>
+</mat-dialog-actions>

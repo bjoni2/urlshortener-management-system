@@ -1,0 +1,65 @@
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filter-search {
+  flex: 1 1 20rem;
+}
+
+.filter-select {
+  flex: 0 0 11rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 0.875rem;
+  background: var(--mat-sys-surface);
+
+  table {
+    width: 100%;
+    min-width: 44rem;
+    background: transparent;
+  }
+}
+
+.you-label {
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 0.25rem;
+}
+
+.role-chip {
+  --mdc-chip-elevated-container-color: var(--mat-sys-surface-container-highest);
+  --mdc-chip-label-text-color: var(--mat-sys-on-surface-variant);
+}
+
+.role-admin {
+  --mdc-chip-elevated-container-color: var(--mat-sys-tertiary-container);
+  --mdc-chip-label-text-color: var(--mat-sys-on-tertiary-container);
+}
+
+.state-chip {
+  --mdc-chip-elevated-container-color: color-mix(in srgb, #2e7d32 15%, transparent);
+  --mdc-chip-label-text-color: #1b5e20;
+}
+
+.state-off {
+  --mdc-chip-elevated-container-color: var(--mat-sys-error-container);
+  --mdc-chip-label-text-color: var(--mat-sys-on-error-container);
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+
+@media (max-width: 720px) {
+  .filter-select {
+    flex: 1 1 100%;
+  }
+}

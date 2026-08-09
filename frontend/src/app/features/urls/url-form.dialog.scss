@@ -1,0 +1,63 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  min-width: min(30rem, 78vw);
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-checkbox,
+mat-slide-toggle {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.dialog-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  font: var(--mat-sys-body-small);
+}
+
+.spinner-inline {
+  display: inline-block;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.expiry-row {
+  display: flex;
+  gap: 0.75rem;
+
+  .expiry-date {
+    flex: 1 1 auto;
+  }
+
+  .expiry-time {
+    flex: 0 0 9rem;
+  }
+}
+
+.expiry-hint {
+  margin: -0.5rem 0 0.75rem;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 30rem) {
+  .expiry-row {
+    flex-direction: column;
+
+    .expiry-time {
+      flex: 1 1 auto;
+    }
+  }
+}

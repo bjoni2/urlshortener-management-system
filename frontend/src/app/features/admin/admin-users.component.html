@@ -1,0 +1,132 @@
+<header class="page-header">
+  <div>
+    <h1>Users</h1>
+    <p class="page-subtitle">All accounts</p>
+  </div>
+</header>
+
+<section class="filters" aria-label="Filters">
+  <mat-form-field appearance="outline" class="filter-search">
+    <mat-label>Search</mat-label>
+    <input matInput [formControl]="search" placeholder="Email address" />
+    <mat-icon matPrefix>search</mat-icon>
+    @if (search.value) {
+      <button matIconButton matSuffix type="button" aria-label="Clear search" (click)="search.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-select">
+    <mat-label>Role</mat-label>
+    <mat-select [formControl]="role">
+      <mat-option value="">All roles</mat-option>
+      <mat-option value="USER">User</mat-option>
+      <mat-option value="ADMIN">Administrator</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-select">
+    <mat-label>State</mat-label>
+    <mat-select [formControl]="enabled">
+      <mat-option value="">All accounts</mat-option>
+      <mat-option value="true">Active</mat-option>
+      <mat-option value="false">Deactivated</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  @if (hasFilters) {
+    <button matButton type="button" (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon>
+      Clear filters
+    </button>
+  }
+</section>
+
+@if (loading()) {
+  <div class="state-panel"><mat-spinner diameter="40" /></div>
+} @else if (error(); as message) {
+  <div class="state-panel error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ message }}</p>
+    <button matButton="outlined" (click)="reload()">Try again</button>
+  </div>
+} @else if (rows().length === 0) {
+  <div class="state-panel">
+    <mat-icon>person_off</mat-icon>
+    <p>No accounts match these filters.</p>
+    @if (hasFilters) {
+      <button matButton="outlined" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="rows()" matSort (matSortChange)="onSort($event)">
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+        <td mat-cell *matCellDef="let user">
+          {{ user.email }}
+          @if (isSelf(user)) {
+            <small class="you-label">(you)</small>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+        <td mat-cell *matCellDef="let user">
+          <mat-chip-set>
+            <mat-chip class="role-chip" [class.role-admin]="user.role === 'ADMIN'" disableRipple>
+              {{ user.role === 'ADMIN' ? 'Administrator' : 'User' }}
+            </mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="enabled">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>State</th>
+        <td mat-cell *matCellDef="let user">
+          <mat-chip-set>
+            <mat-chip class="state-chip" [class.state-off]="!user.enabled" disableRipple>
+              <mat-icon matChipAvatar>{{ user.enabled ? 'check_circle' : 'block' }}</mat-icon>
+              {{ user.enabled ? 'Active' : 'Deactivated' }}
+            </mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Registered</th>
+        <td mat-cell *matCellDef="let user">
+          <span [matTooltip]="user.createdAt">{{ user.createdAt | relativeTime }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef aria-label="Actions"></th>
+        <td mat-cell *matCellDef="let user" class="actions-cell">
+          <button
+            matButton
+            [disabled]="isSelf(user) && user.enabled"
+            [matTooltip]="isSelf(user) && user.enabled ? 'You cannot deactivate your own account' : ''"
+            (click)="toggleEnabled(user)"
+          >
+            {{ user.enabled ? 'Deactivate' : 'Activate' }}
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)"
+  />
+}

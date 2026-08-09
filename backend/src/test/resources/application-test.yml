@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:urlshortener;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  docker-compose:
+    enabled: false
+
+app:
+  security:
+    jwt:
+      issuer: urlshortener-test
+      secret: test-secret-that-is-long-enough-for-hs256-aaaa
+      access-token-ttl: 15m
+      refresh-token-ttl: 7d
+    bootstrap-admin:
+      enabled: false
+      email: admin@test.local
+      password: Admin123!
+  expiration:
+    cron: "-"
+
+logging:
+  level:
+    org.springframework.security: WARN

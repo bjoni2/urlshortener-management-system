@@ -1,0 +1,145 @@
+<header class="page-header">
+  <div>
+    <h1>My URLs</h1>
+    <p class="page-subtitle">Your links</p>
+  </div>
+  <button matButton="filled" (click)="create()">
+    <mat-icon>add_link</mat-icon>
+    Shorten a URL
+  </button>
+</header>
+
+<section class="filters" aria-label="Filters">
+  <mat-form-field appearance="outline" class="filter-search">
+    <mat-label>Search</mat-label>
+    <input matInput [formControl]="search" placeholder="Short code or destination" />
+    <mat-icon matPrefix>search</mat-icon>
+    @if (search.value) {
+      <button matIconButton matSuffix type="button" aria-label="Clear search" (click)="search.setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-status">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="status">
+      <mat-option value="">All statuses</mat-option>
+      <mat-option value="ACTIVE">Active</mat-option>
+      <mat-option value="INACTIVE">Inactive</mat-option>
+      <mat-option value="EXPIRED">Expired</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  @if (hasFilters) {
+    <button matButton type="button" (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon>
+      Clear filters
+    </button>
+  }
+</section>
+
+@if (loading()) {
+  <div class="state-panel"><mat-spinner diameter="40" /></div>
+} @else if (error(); as message) {
+  <div class="state-panel error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ message }}</p>
+    <button matButton="outlined" (click)="reload()">Try again</button>
+  </div>
+} @else if (rows().length === 0) {
+  <div class="state-panel">
+    <mat-icon>link_off</mat-icon>
+    @if (hasFilters) {
+      <p>No links match these filters.</p>
+      <button matButton="outlined" (click)="clearFilters()">Clear filters</button>
+    } @else {
+      <p>You don't have any links yet.</p>
+      <button matButton="filled" (click)="create()">Create your first link</button>
+    }
+  </div>
+} @else {
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="rows()" matSort (matSortChange)="onSort($event)" class="url-table">
+      <ng-container matColumnDef="shortCode">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Short link</th>
+        <td mat-cell *matCellDef="let url">
+          <a class="short-code" [href]="url.shortUrl" target="_blank" rel="noopener noreferrer">
+            /{{ url.shortCode }}
+          </a>
+          @if (url.customAlias) {
+            <mat-icon class="alias-badge" matTooltip="Custom alias">bookmark</mat-icon>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="originalUrl">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Destination</th>
+        <td mat-cell *matCellDef="let url">
+          <span class="destination" [matTooltip]="url.originalUrl">{{ url.originalUrl }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let url"><app-url-status-chip [status]="url.status" /></td>
+      </ng-container>
+
+      <ng-container matColumnDef="clickCount">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="numeric">Clicks</th>
+        <td mat-cell *matCellDef="let url" class="numeric">
+          <span [matTooltip]="'Last visited ' + (url.lastAccessedAt ? (url.lastAccessedAt | relativeTime) : 'never')">
+            {{ url.clickCount }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="expiresAt">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Expires</th>
+        <td mat-cell *matCellDef="let url">
+          <span [matTooltip]="url.expiresAt ?? 'This link never expires'">
+            {{ url.expiresAt | relativeTime: 'Never' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef aria-label="Actions"></th>
+        <td mat-cell *matCellDef="let url" class="actions-cell">
+          <button matIconButton [matTooltip]="'Copy ' + url.shortUrl" (click)="copy(url)" aria-label="Copy short URL">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+          <button matIconButton [matMenuTriggerFor]="rowMenu" aria-label="More actions">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #rowMenu="matMenu">
+            <button mat-menu-item (click)="edit(url)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="toggleActive(url)" [disabled]="url.status === 'EXPIRED'">
+              <mat-icon>{{ url.status === 'ACTIVE' ? 'pause_circle' : 'play_circle' }}</mat-icon>
+              <span>{{ url.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+            <button mat-menu-item class="danger" (click)="remove(url)">
+              <mat-icon>delete_outline</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    showFirstLastButtons
+    (page)="onPage($event)"
+  />
+}
